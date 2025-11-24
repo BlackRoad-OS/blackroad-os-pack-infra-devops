@@ -10,7 +10,7 @@
     "lint": "echo 'Add linting as needed'"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^20.0.0",
     "typescript": "^5.4.0",
     "vitest": "^1.6.0"
   }
