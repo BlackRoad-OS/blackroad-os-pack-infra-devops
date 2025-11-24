@@ -1,0 +1,44 @@
+# ---
+# name: Terraform Plan
+# description: Validate and plan Cloudflare and Railway modules
+# required_secrets: [CLOUDFLARE_API_TOKEN, RAILWAY_TOKEN]
+# ---
+name: {{name}}
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive iac
+
+  plan:
+    runs-on: ubuntu-latest
+    needs: fmt
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: HashiCorp - Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+      - name: Init modules
+        run: terraform -chdir=iac init
+      - name: Validate modules
+        run: terraform -chdir=iac validate
+      - name: Plan Cloudflare
+        run: terraform -chdir=iac plan -target=module.module_cloudflare
+      - name: Plan Railway
+        run: terraform -chdir=iac plan -target=module.module_railway_service

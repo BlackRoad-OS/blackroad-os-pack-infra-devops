@@ -1,0 +1,35 @@
+{
+  "name": "blackroad-os-pack-infra-devops",
+  "version": "0.1.0",
+  "description": "InfraPack-Gen-0 scaffold for BlackRoad OS",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node dist/scripts/postbuild.js",
+    "lint": "eslint 'src/**/*.ts' 'lib/**/*.ts' 'agents/**/*.ts'",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "br-infra": "ts-node src/cli.ts",
+    "postbuild": "ts-node scripts/postbuild.ts"
+  },
+  "bin": {
+    "br-infra": "./dist/cli.js"
+  },
+  "dependencies": {
+    "handlebars": "^4.7.8",
+    "yaml": "^2.4.5",
+    "yargs": "^17.7.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@types/yargs": "^17.0.33",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.7.0",
+    "typescript": "^5.4.5"
+  }
+}
