@@ -22,7 +22,6 @@ resource "cloudflare_record" "cname" {
   value   = var.cname_target
   type    = "CNAME"
   proxied = true
-  ttl     = 300
 }
 
 # TODO(infra-pack-next): add WAF rules, rate limiting, and Zero Trust policies.
