@@ -36,6 +36,8 @@ jobs:
           terraform_version: 1.10.x
       - name: Terraform fmt
         run: terraform fmt -check -recursive iac
+      - name: Terraform init
+        run: terraform -chdir=iac init
       - name: Terraform validate
         run: terraform -chdir=iac validate
 
