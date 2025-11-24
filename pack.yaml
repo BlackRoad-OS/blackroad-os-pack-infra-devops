@@ -1,0 +1,20 @@
+id: infra-devops
+name: Infra & DevOps Pack
+version: 0.1.0
+description: >
+  Infrastructure, environment, and deployment orchestration agents and workflows
+  for BlackRoad OS services and packs.
+required_roles:
+  - Infra Steward
+  - Deploy Conductor
+  - Incident Sheriff
+depends_on:
+  - blackroad-os-core >=0.1.0
+  - blackroad-os-infra >=0.1.0
+  - blackroad-os-beacon >=0.1.0
+tags:
+  - infra
+  - devops
+  - ci-cd
+  - observability
+  - oncall

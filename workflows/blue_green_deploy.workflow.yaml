@@ -1,0 +1,21 @@
+id: infra_blue_green_deploy
+description: Coordinate blue/green or canary deployment across multiple services.
+steps:
+  - id: plan_deploy
+    agent: infra-deploy-conductor-01
+    input: services
+    output: deployment_plan
+  - id: run_canary
+    agent: infra-deploy-conductor-01
+    input: deployment_plan
+    output: canary_report
+  - id: verify_health
+    agent: infra-steward-01
+    input: beacon_health_signals
+    output: health_verification
+  - id: shift_traffic
+    agent: infra-deploy-conductor-01
+    input:
+      target_env: env
+      verification: health_verification
+    output: traffic_shift_status

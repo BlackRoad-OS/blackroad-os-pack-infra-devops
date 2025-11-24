@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Infra DevOps Pack Manifest",
+  "type": "object",
+  "required": ["id", "name", "version", "description", "required_roles", "depends_on", "tags"],
+  "properties": {
+    "id": { "type": "string", "const": "infra-devops" },
+    "name": { "type": "string" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "description": { "type": "string" },
+    "required_roles": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "depends_on": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "tags": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+  },
+  "additionalProperties": true
+}

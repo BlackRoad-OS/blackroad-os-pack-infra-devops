@@ -1,0 +1,17 @@
+{
+  "name": "blackroad-os-pack-infra-devops",
+  "version": "0.1.0",
+  "description": "Infra & DevOps pack scaffolding for BlackRoad OS",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:ts": "vitest run",
+    "test:py": "pytest",
+    "lint": "echo 'Add linting as needed'"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

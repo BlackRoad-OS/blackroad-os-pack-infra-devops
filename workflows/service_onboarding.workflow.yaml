@@ -1,0 +1,23 @@
+id: infra_service_onboarding
+description: Onboard a new BlackRoad OS service into DNS, Railway, and Beacon.
+steps:
+  - id: validate_dns
+    agent: infra-steward-01
+    input: dns_blueprint
+    output: dns_validation_report
+  - id: validate_service_template
+    agent: infra-steward-01
+    input: railway_template
+    output: service_template_report
+  - id: plan_initial_deploy
+    agent: infra-deploy-conductor-01
+    input:
+      service: service
+      envs: envs
+    output: deployment_plan
+  - id: register_beacon
+    agent: infra-steward-01
+    input:
+      service: service
+      beacon_spec: beacon_spec
+    output: beacon_registration_plan

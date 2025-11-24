@@ -1,0 +1,19 @@
+id: infra_incident_response
+description: Guide structured SEV response for BlackRoad services.
+steps:
+  - id: classify_incident
+    agent: oncall-buddy-01
+    input: incident_event
+    output: classification
+  - id: select_runbook
+    agent: oncall-buddy-01
+    input: classification
+    output: runbook_steps
+  - id: guide_execution
+    agent: oncall-buddy-01
+    input: runbook_steps
+    output: incident_notes
+  - id: prepare_postmortem
+    agent: oncall-buddy-01
+    input: { incident_id: incident_id, notes: incident_notes }
+    output: postmortem_outline
