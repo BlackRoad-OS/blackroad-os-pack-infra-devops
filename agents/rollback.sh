@@ -11,13 +11,12 @@ payload() {
   cat <<JSON
 {
   "service": "${SERVICE}",
-  "target": "${TARGET_SHA}",
-  "token": "${RAILWAY_TOKEN}"
+  "target": "${TARGET_SHA}"
 }
 JSON
 }
 
 echo "[rollback] Initiating rollback for ${SERVICE} to ${TARGET_SHA}"
-response=$(curl -sS -X POST -H "Content-Type: application/json" -d "$(payload)" "${GATEWAY_URL}")
+response=$(curl -sS -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${RAILWAY_TOKEN}" -d "$(payload)" "${GATEWAY_URL}")
 
 echo "[rollback] Response: ${response}"

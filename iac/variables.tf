@@ -1,7 +1,7 @@
 variable "cloudflare_api_token" {
   description = "Token for Cloudflare provider"
   type        = string
-  default     = "example-token"
+  sensitive   = true
 }
 
 variable "cloudflare_account_id" {
@@ -31,7 +31,7 @@ variable "cloudflare_cname_target" {
 variable "railway_token" {
   description = "Railway API token"
   type        = string
-  default     = "example-railway-token"
+  sensitive   = true
 }
 
 variable "railway_project_name" {

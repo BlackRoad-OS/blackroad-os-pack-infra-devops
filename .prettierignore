@@ -1,0 +1,12 @@
+# Template files (Handlebars formatting is not compatible with Prettier)
+pipelines/*.hbs
+*.yaml.hbs
+*.yml.hbs
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Build output
+dist/

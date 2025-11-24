@@ -3,7 +3,7 @@ name: Infra DevOps Pack CI
 on:
   pull_request:
   push:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   lint:
@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
+          cache: 'pnpm'
       - name: Install deps
         run: pnpm install --frozen-lockfile
       - name: ESLint
@@ -33,9 +33,11 @@ jobs:
       - name: HashiCorp - Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.5
+          terraform_version: 1.10.x
       - name: Terraform fmt
         run: terraform fmt -check -recursive iac
+      - name: Terraform init
+        run: terraform -chdir=iac init
       - name: Terraform validate
         run: terraform -chdir=iac validate
 

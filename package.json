@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json && node dist/scripts/postbuild.js",
+    "build": "tsc -p tsconfig.json && node dist/postbuild.js",
     "lint": "eslint 'src/**/*.ts' 'lib/**/*.ts' 'agents/**/*.ts'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -22,6 +22,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/handlebars": "^4.1.0",
     "@types/node": "^22.7.4",
     "@types/yargs": "^17.0.33",
     "eslint": "^8.57.0",

@@ -62,7 +62,11 @@ yargs(hideBin(process.argv))
       const entry = path.join(agentsDir, 'scale.ts');
       const result = spawnSync('ts-node', [entry], {
         stdio: 'inherit',
-        env: { ...process.env, SERVICE: args.service as string, SCALE_TARGET: String(args.replicas) },
+        env: {
+          ...process.env,
+          SERVICE: args.service as string,
+          SCALE_TARGET: String(args.replicas),
+        },
       });
       process.exit(result.status ?? 0);
     }
