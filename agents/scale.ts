@@ -12,14 +12,16 @@ if (!token || !service) {
 const payload = {
   service,
   replicas: target,
-  token,
 };
 
 console.log(`[scale] Scaling ${service} to ${target} replicas`);
 
 const request = new Request(endpoint, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  },
   body: JSON.stringify(payload),
 });
 
