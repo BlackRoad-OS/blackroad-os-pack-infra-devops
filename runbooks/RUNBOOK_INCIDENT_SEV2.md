@@ -16,7 +16,7 @@ Structured response for high-impact but non-critical incidents.
 5. Prepare follow-ups and assign owners before closing the incident.
 
 ## Communication Channels
-- Incident channel: `<placeholder-incident-channel>`
+- Incident channel: `#incident-{id}`
 
 ## References
 - Workflow: `infra_incident_response`
