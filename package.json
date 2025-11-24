@@ -30,6 +30,7 @@
     "prettier": "^3.3.3",
     "ts-node": "^10.9.2",
     "tslib": "^2.7.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "@types/handlebars": "^4.1.0"
   }
 }
