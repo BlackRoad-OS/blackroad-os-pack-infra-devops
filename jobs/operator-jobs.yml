@@ -1,0 +1,627 @@
+# Operator Job Specifications
+
+This file defines job specifications that `blackroad-os-operator` can execute for infrastructure and DevOps operations.
+
+---
+
+## Job Definitions
+
+### infra.deploy_service
+
+**Description**: Deploy a service to a specified environment
+
+**Category**: Deployment
+
+**Inputs**:
+```yaml
+service_id:
+  type: string
+  required: true
+  description: "Identifier of the service to deploy (e.g., 'blackroad-os-api', 'blackroad-os-web')"
+  examples:
+    - "blackroad-os-api"
+    - "blackroad-os-web"
+    - "blackroad-os-operator"
+
+environment:
+  type: string
+  required: true
+  enum: ["local", "staging", "production"]
+  description: "Target environment for deployment"
+
+artifact_id:
+  type: string
+  required: true
+  description: "Unique identifier of the build artifact to deploy"
+
+deployment_strategy:
+  type: string
+  required: false
+  default: "rolling"
+  enum: ["rolling", "blue-green", "canary", "recreate"]
+  description: "Deployment strategy to use"
+
+canary_percentage:
+  type: integer
+  required: false
+  default: 10
+  min: 1
+  max: 100
+  description: "Percentage of traffic to route to canary (only for canary strategy)"
+```
+
+**Outputs**:
+```yaml
+deployment_id:
+  type: string
+  description: "Unique identifier for this deployment"
+
+status:
+  type: string
+  enum: ["success", "failed", "rolled_back"]
+  description: "Final status of the deployment"
+
+deployed_version:
+  type: string
+  description: "Version identifier that was deployed"
+
+deployment_url:
+  type: string
+  description: "URL where deployed service is accessible"
+
+message:
+  type: string
+  description: "Human-readable status message"
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 2
+backoff_seconds: 30
+retry_on: ["timeout", "infrastructure_error"]
+no_retry_on: ["validation_error", "artifact_not_found"]
+```
+
+**Timeout**: 1800 seconds (30 minutes)
+
+**Priority**: High
+
+---
+
+### infra.rollback_service
+
+**Description**: Rollback a service to a previous version
+
+**Category**: Deployment
+
+**Inputs**:
+```yaml
+service_id:
+  type: string
+  required: true
+  description: "Service to rollback"
+
+environment:
+  type: string
+  required: true
+  enum: ["staging", "production"]
+  description: "Environment to rollback in"
+
+target_deployment_id:
+  type: string
+  required: false
+  description: "Specific deployment to rollback to (if omitted, uses last known good)"
+
+reason:
+  type: string
+  required: true
+  description: "Reason for rollback"
+```
+
+**Outputs**:
+```yaml
+rollback_id:
+  type: string
+  description: "Unique identifier for this rollback"
+
+status:
+  type: string
+  enum: ["success", "failed"]
+
+previous_version:
+  type: string
+  description: "Version that was rolled back from"
+
+restored_version:
+  type: string
+  description: "Version that was restored"
+
+message:
+  type: string
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 3
+backoff_seconds: 10
+```
+
+**Timeout**: 900 seconds (15 minutes)
+
+**Priority**: Critical
+
+---
+
+### infra.run_smoke_tests
+
+**Description**: Execute smoke tests for a service
+
+**Category**: Testing
+
+**Inputs**:
+```yaml
+service_id:
+  type: string
+  required: true
+  description: "Service to test"
+
+environment:
+  type: string
+  required: true
+  enum: ["staging", "production"]
+  description: "Environment to test in"
+
+deployment_id:
+  type: string
+  required: false
+  description: "Link to specific deployment (for record-keeping)"
+
+test_suite:
+  type: string
+  required: false
+  default: "default"
+  description: "Which test suite to run"
+  examples:
+    - "default"
+    - "critical-only"
+    - "comprehensive"
+```
+
+**Outputs**:
+```yaml
+overall_status:
+  type: string
+  enum: ["passed", "failed", "error"]
+  description: "Overall test result"
+
+tests_passed:
+  type: integer
+  description: "Number of tests that passed"
+
+tests_failed:
+  type: integer
+  description: "Number of tests that failed"
+
+tests_total:
+  type: integer
+  description: "Total number of tests executed"
+
+test_report_url:
+  type: string
+  description: "URL to detailed test report"
+
+failed_tests:
+  type: array
+  description: "List of failed test names"
+
+execution_time_ms:
+  type: integer
+  description: "Total execution time in milliseconds"
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 1
+backoff_seconds: 5
+```
+
+**Timeout**: 600 seconds (10 minutes)
+
+**Priority**: Normal
+
+---
+
+### infra.rotate_logs
+
+**Description**: Archive and rotate log files
+
+**Category**: Maintenance
+
+**Inputs**:
+```yaml
+service_id:
+  type: string
+  required: true
+  description: "Service whose logs to rotate"
+
+max_age_days:
+  type: integer
+  required: false
+  default: 30
+  description: "Delete logs older than this many days"
+
+compress:
+  type: boolean
+  required: false
+  default: true
+  description: "Compress archived logs"
+```
+
+**Outputs**:
+```yaml
+status:
+  type: string
+  enum: ["success", "failed"]
+
+logs_archived:
+  type: integer
+  description: "Number of log files archived"
+
+space_freed_mb:
+  type: integer
+  description: "Disk space freed in megabytes"
+
+message:
+  type: string
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 2
+backoff_seconds: 60
+```
+
+**Timeout**: 3600 seconds (1 hour)
+
+**Priority**: Low
+
+---
+
+### infra.daily_health_sweep
+
+**Description**: Run comprehensive health checks across all services
+
+**Category**: Monitoring
+
+**Inputs**:
+```yaml
+environment:
+  type: string
+  required: false
+  default: "production"
+  enum: ["staging", "production", "all"]
+  description: "Which environment(s) to check"
+
+detailed:
+  type: boolean
+  required: false
+  default: false
+  description: "Include detailed health metrics (slower)"
+```
+
+**Outputs**:
+```yaml
+overall_health:
+  type: string
+  enum: ["healthy", "degraded", "critical"]
+  description: "Overall health status"
+
+services_checked:
+  type: integer
+  description: "Number of services checked"
+
+services_healthy:
+  type: integer
+  description: "Number of healthy services"
+
+services_degraded:
+  type: integer
+  description: "Number of degraded services"
+
+services_down:
+  type: integer
+  description: "Number of services that are down"
+
+health_report_url:
+  type: string
+  description: "URL to detailed health report"
+
+issues_found:
+  type: array
+  description: "List of issues detected"
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 1
+backoff_seconds: 300
+```
+
+**Timeout**: 900 seconds (15 minutes)
+
+**Priority**: Normal
+
+---
+
+### infra.backup_snapshot
+
+**Description**: Create backup snapshot of critical data
+
+**Category**: Backup
+
+**Inputs**:
+```yaml
+backup_type:
+  type: string
+  required: true
+  enum: ["database", "config", "full"]
+  description: "Type of backup to create"
+
+retention_days:
+  type: integer
+  required: false
+  default: 30
+  description: "How long to keep this backup"
+
+environment:
+  type: string
+  required: true
+  enum: ["staging", "production"]
+  description: "Environment to backup"
+```
+
+**Outputs**:
+```yaml
+status:
+  type: string
+  enum: ["success", "failed"]
+
+backup_id:
+  type: string
+  description: "Unique identifier for the backup"
+
+backup_size_mb:
+  type: integer
+  description: "Size of backup in megabytes"
+
+backup_location:
+  type: string
+  description: "Storage location of backup"
+
+expires_at:
+  type: string
+  description: "When this backup will be deleted (ISO 8601)"
+
+message:
+  type: string
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 2
+backoff_seconds: 300
+```
+
+**Timeout**: 7200 seconds (2 hours)
+
+**Priority**: High
+
+---
+
+### infra.scale_service
+
+**Description**: Scale a service horizontally (change instance count)
+
+**Category**: Scaling
+
+**Inputs**:
+```yaml
+service_id:
+  type: string
+  required: true
+  description: "Service to scale"
+
+environment:
+  type: string
+  required: true
+  enum: ["staging", "production"]
+  description: "Environment to scale in"
+
+target_instance_count:
+  type: integer
+  required: true
+  min: 0
+  max: 100
+  description: "Desired number of instances"
+
+reason:
+  type: string
+  required: false
+  description: "Reason for scaling (for audit log)"
+```
+
+**Outputs**:
+```yaml
+status:
+  type: string
+  enum: ["success", "failed"]
+
+previous_count:
+  type: integer
+  description: "Instance count before scaling"
+
+current_count:
+  type: integer
+  description: "Instance count after scaling"
+
+message:
+  type: string
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 2
+backoff_seconds: 30
+```
+
+**Timeout**: 600 seconds (10 minutes)
+
+**Priority**: High
+
+---
+
+### infra.update_config
+
+**Description**: Update service configuration
+
+**Category**: Configuration
+
+**Inputs**:
+```yaml
+service_id:
+  type: string
+  required: true
+  description: "Service to configure"
+
+environment:
+  type: string
+  required: true
+  enum: ["staging", "production"]
+  description: "Environment to update"
+
+config_key:
+  type: string
+  required: true
+  description: "Configuration key to update"
+
+config_value:
+  type: string
+  required: true
+  description: "New configuration value"
+
+restart_required:
+  type: boolean
+  required: false
+  default: false
+  description: "Whether service needs restart after config change"
+```
+
+**Outputs**:
+```yaml
+status:
+  type: string
+  enum: ["success", "failed"]
+
+previous_value:
+  type: string
+  description: "Previous configuration value"
+
+restarted:
+  type: boolean
+  description: "Whether service was restarted"
+
+message:
+  type: string
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 1
+backoff_seconds: 10
+```
+
+**Timeout**: 300 seconds (5 minutes)
+
+**Priority**: Normal
+
+---
+
+### infra.test_job
+
+**Description**: Test job for verifying Operator functionality
+
+**Category**: Testing
+
+**Inputs**:
+```yaml
+sleep_seconds:
+  type: integer
+  required: false
+  default: 1
+  min: 0
+  max: 60
+  description: "How long to sleep (simulates work)"
+
+should_fail:
+  type: boolean
+  required: false
+  default: false
+  description: "Force job to fail (for testing error handling)"
+```
+
+**Outputs**:
+```yaml
+status:
+  type: string
+  enum: ["success", "failed"]
+
+message:
+  type: string
+
+execution_time_ms:
+  type: integer
+```
+
+**Retry Policy**:
+```yaml
+max_retries: 0
+```
+
+**Timeout**: 120 seconds
+
+**Priority**: Low
+
+---
+
+## Job Execution Notes
+
+- All jobs should be idempotent where possible
+- Jobs should log progress for debugging
+- Jobs should handle timeouts gracefully
+- Jobs should clean up resources on failure
+- Jobs should support cancellation
+- Jobs should validate inputs before execution
+- Jobs should provide meaningful error messages
+
+---
+
+## Integration with Operator
+
+`blackroad-os-operator` should:
+1. Register these job types
+2. Implement execution logic for each
+3. Respect retry policies
+4. Enforce timeouts
+5. Track job execution history
+6. Provide job status API
+7. Support job cancellation
+8. Log all job executions
+
+---
+
+## Related Documentation
+
+- `workflows/deploy-api.md` - Uses `infra.deploy_service`
+- `workflows/rollback.md` - Uses `infra.rollback_service`
+- `workflows/smoke-tests.md` - Uses `infra.run_smoke_tests`
+- `integration/with-operator.md` - How these jobs integrate with Operator
