@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json && node dist/scripts/postbuild.js",
+    "build": "tsc -p tsconfig.json && node dist/postbuild.js",
     "lint": "eslint 'src/**/*.ts' 'lib/**/*.ts' 'agents/**/*.ts'",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
