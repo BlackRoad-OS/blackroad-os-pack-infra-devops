@@ -31,9 +31,7 @@ variable "cloudflare_cname_target" {
 variable "railway_token" {
   description = "Railway API token"
   type        = string
-  default     = "example-railway-token"
 }
-
 variable "railway_project_name" {
   description = "Railway project name"
   type        = string
