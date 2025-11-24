@@ -11,13 +11,12 @@ payload() {
   cat <<JSON
 {
   "service": "${SERVICE}",
-  "version": "${APP_VERSION}",
-  "token": "${RAILWAY_TOKEN}"
+  "version": "${APP_VERSION}"
 }
 JSON
 }
 
 echo "[deploy] Triggering deployment for ${SERVICE} (version=${APP_VERSION})"
-response=$(curl -sS -X POST -H "Content-Type: application/json" -d "$(payload)" "${GATEWAY_URL}")
+response=$(curl -sS -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${RAILWAY_TOKEN}" -d "$(payload)" "${GATEWAY_URL}")
 
 echo "[deploy] Response: ${response}"
