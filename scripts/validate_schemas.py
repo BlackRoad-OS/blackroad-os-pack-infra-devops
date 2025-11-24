@@ -1,6 +1,5 @@
 import json
 import pathlib
-import sys
 from jsonschema import Draft7Validator
 import yaml
 
