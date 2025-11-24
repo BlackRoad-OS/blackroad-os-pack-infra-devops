@@ -23,15 +23,18 @@ const request = new Request(endpoint, {
   body: JSON.stringify(payload),
 });
 
-fetch(request)
-  .then(async (res) => {
+async function main() {
+  try {
+    const res = await fetch(request);
     const body = await res.text();
     if (!res.ok) {
       throw new Error(`Scale failed (${res.status}): ${body}`);
     }
     console.log(`[scale] Response: ${body}`);
-  })
-  .catch((err) => {
+  } catch (err: any) {
     console.error(`[scale] Error: ${err.message}`);
     process.exitCode = 1;
-  });
+  }
+}
+
+main();
