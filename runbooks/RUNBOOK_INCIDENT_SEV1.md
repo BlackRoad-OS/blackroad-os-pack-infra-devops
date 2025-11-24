@@ -17,8 +17,8 @@ Provide a clear, time-bound response for highest-severity incidents.
 6. Prepare postmortem outline while details are fresh.
 
 ## Communication Channels
-- Incident channel: `<placeholder-incident-channel>`
-- Leadership updates: `<placeholder-leadership-channel>`
+- Incident channel: `#incident-{id}`
+- Leadership updates: `#leadership-escalations`
 
 ## References
 - Workflow: `infra_incident_response`
