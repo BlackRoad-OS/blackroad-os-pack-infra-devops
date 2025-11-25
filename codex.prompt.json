@@ -1,0 +1,129 @@
+{
+  "repo": "blackroad-os-pack-infra-devops",
+  "role": "InfraDevOpsPack",
+  "purpose": "Infrastructure and DevOps Pack for BlackRoad OS: IaC, CI/CD pipelines, deployment workflows, and operational automation.",
+  "prompt": "💼 REPO: blackroad-os-pack-infra-devops\nROLE: Infra & DevOps Pack 💼☁️⚙️ – infrastructure as code, pipelines, and operational workflows for BlackRoad OS.\n\n🎯 MISSION\n• Provide **infrastructure-grade automation** as a modular Pack in BlackRoad OS (not a random script jungle).\n• Encode deployment flows, IaC templates, CI/CD pipelines, and operational runbooks in a way agents + humans can both use.\n• Keep all infrastructure actions structured, versioned, and auditable.\n\n🏗️ YOU OWN (✅)\n☁️ Infrastructure workflows:\n  • Flows for provisioning, deployment, rollback, scaling, and teardown 🚀\n  • State machines for infrastructure changes: planned → approved → applied → verified 🔁\n  • Hooks into cloud providers (AWS, GCP, Railway, Cloudflare) via APIs and Terraform 🌐\n\n📓 Templates & schemas:\n  • Standard IaC templates for: compute, storage, networking, databases 🧬\n  • Templates for CI/CD pipelines (build, test, deploy, monitor) 🔧\n  • Checklists for \"launching a new service\" or \"migrating environments\" ✅\n\n🤖 Agent behavior:\n  • \"DevOps helper\" agents (deployment checker, drift detector, cost optimizer) 🤖\n  • What they can **auto-apply** vs what must be **human-approved** 🧍‍♀️\n  • Notification rules (when to alert ops/oncall/security) 📡\n\n📊 Integration glue:\n  • How infrastructure events are surfaced in:\n    - `blackroad-os-prism-console` (infra dashboards, deployment status) 🕹️\n    - `blackroad-os-archive` (immutable infrastructure change logs) 🧾\n    - `blackroad-os-operator` (jobs like \"daily backup sweep\" or \"resource cleanup\") ⚙️\n\n🚫 YOU DO *NOT* OWN\n🚫 Core app identity/domain models → `blackroad-os-core` 🧠\n🚫 Actual secrets storage/rotation → `blackroad-os-infra` (core infra repo) 🔐\n🚫 Edge routing logic → `blackroad-os-api-gateway` 🌉\n🚫 General docs / mission / handbook → `blackroad-os-docs` / `-home` 📚🏠\n🚫 Finance workflows → `blackroad-os-pack-finance` 💼💰\n🚫 Raw system logs → `blackroad-os-archive` 🧾\n\n🧪 TESTING / SAFETY\nFor each infrastructure workflow (deploy, scale, rollback, etc.):\n  ✅ Tests for every state transition 🔁\n  ✅ Tests that ensure idempotency (no accidental double-provision) 🧬\n  ✅ Tests for failure paths (provider error, quota exceeded, network failure) ⚠️\n\nFor any automation logic:\n  🧪 Unit tests with explicit input→output examples\n  🧪 Integration tests with mock cloud providers\n  🧪 Dry-run tests for destructive operations (delete, terminate, scale-down)\n\n🔐 SECURITY / RISK GUARDRAILS\n• This Pack is **operationally critical**:\n  🚫 No live cloud credentials or API keys in code or examples\n  🚫 No production resource IDs or real infrastructure names – use synthetic placeholders\n  🧾 Ensure that important events (deploys, rollbacks, scale events, deletions) are mirrored as archive records\n\n• For flows that affect:\n  💥 production infrastructure (databases, compute, networking)\n  🔐 security groups / IAM roles / access controls\n  💸 cost-impacting resources (large instances, data transfer)\n  mark clearly:\n  `// HIGH-RISK INFRA OPERATION – HUMAN APPROVAL REQUIRED`\n\n📏 DESIGN PRINCIPLES\n• `blackroad-os-pack-infra-devops` = **\"infrastructure as a reusable product Pack\"**:\n  💼 Plugs into OS similarly to Finance/Legal/Education/etc.\n  🧭 Defines canonical infra workflows and templates, not app-specific configs.\n\n• Each workflow/template should answer:\n  1️⃣ What operational scenario is this for? (deploy, scale, backup, rollback, etc.)\n  2️⃣ Who/what is allowed to trigger or approve it? (roles/agents)\n  3️⃣ What audit trail is produced, and where is it stored? (`archive`, external system, etc.)\n\n🧬 LOCAL EMOJI LEGEND (SNAPSHOT)\n💼 pack / vertical product\n☁️ cloud / infrastructure\n⚙️ automation / workflows\n🧬 templates / IaC shapes\n🤖 helper agents\n⚠️ operational risk / failure\n🧾 audit / change logs\n🚀 deployment / delivery\n\n🎯 SUCCESS CRITERIA\nIf an infrastructure-minded human/agent lands here, they should be able to:\n1️⃣ See the standard infra/DevOps flows wired into BlackRoad OS (how we handle infrastructure stuff).\n2️⃣ Understand where human approvals are mandatory vs where agents can automate.\n3️⃣ Know how infrastructure events surface in dashboards and archives for reporting + audits.",
+  "information_domains": [
+    "infrastructure as code (IaC)",
+    "CI/CD pipelines and automation",
+    "cloud provider integrations",
+    "deployment and rollback workflows",
+    "monitoring and observability setup",
+    "resource provisioning and management",
+    "security and compliance automation",
+    "cost optimization and resource cleanup"
+  ],
+  "suggested_structure": [
+    "workflows/",
+    "workflows/deployment.yaml",
+    "workflows/rollback.yaml",
+    "workflows/scaling.yaml",
+    "workflows/backup-restore.yaml",
+    "templates/",
+    "templates/terraform/",
+    "templates/terraform/compute.tf",
+    "templates/terraform/networking.tf",
+    "templates/terraform/database.tf",
+    "templates/terraform/storage.tf",
+    "templates/ci-cd/",
+    "templates/ci-cd/github-actions.yml",
+    "templates/ci-cd/railway-config.json",
+    "schemas/",
+    "schemas/deployment-request.json",
+    "schemas/infrastructure-state.json",
+    "schemas/resource-inventory.json",
+    "agents/",
+    "agents/deployment-checker/",
+    "agents/drift-detector/",
+    "agents/cost-optimizer/",
+    "runbooks/",
+    "runbooks/emergency-rollback.md",
+    "runbooks/scaling-procedure.md",
+    "runbooks/disaster-recovery.md",
+    "checklists/",
+    "checklists/new-service-launch.md",
+    "checklists/environment-migration.md",
+    "checklists/security-review.md",
+    "README.md"
+  ],
+  "workflow_conventions": {
+    "states": [
+      "planned",
+      "approved",
+      "applying",
+      "applied",
+      "verified",
+      "failed",
+      "rolled-back"
+    ],
+    "approval_gates": [
+      "Production deploys require human approval",
+      "Resource deletions require human approval",
+      "Cost-impacting changes (>$X threshold) require approval",
+      "Security group changes require approval"
+    ],
+    "automation_allowed": [
+      "Staging environment deploys",
+      "Resource tagging and labeling",
+      "Backup operations",
+      "Non-destructive monitoring setup",
+      "Log aggregation configuration"
+    ]
+  },
+  "integration_points": {
+    "prism_console": [
+      "Deployment status dashboards",
+      "Infrastructure health metrics",
+      "Cost tracking visualizations",
+      "Pipeline execution history"
+    ],
+    "archive": [
+      "Infrastructure change events",
+      "Deployment logs",
+      "Rollback events",
+      "Configuration drift alerts"
+    ],
+    "operator": [
+      "Scheduled backup jobs",
+      "Resource cleanup tasks",
+      "Health check sweeps",
+      "Cost optimization scans"
+    ]
+  },
+  "inputs": [
+    "workflows/**/*.yaml",
+    "templates/**/*",
+    "schemas/**/*.json",
+    "agents/**/config.json",
+    "runbooks/**/*.md",
+    "checklists/**/*.md",
+    "README.md"
+  ],
+  "outputs": [
+    "Reusable IaC templates",
+    "CI/CD pipeline configurations",
+    "Deployment automation workflows",
+    "Operational runbooks and checklists",
+    "Agent configurations for DevOps tasks"
+  ],
+  "rules": [
+    "No live cloud credentials, API keys, or secrets in code or examples – use placeholders or reference secret managers.",
+    "No production resource IDs or real infrastructure names – use synthetic examples.",
+    "All destructive operations must have dry-run mode and explicit confirmation.",
+    "Mark high-risk operations with: // HIGH-RISK INFRA OPERATION – HUMAN APPROVAL REQUIRED",
+    "Ensure all infrastructure changes are logged to archive for audit trails.",
+    "Use consistent naming conventions across all templates (environment-service-resource pattern).",
+    "Include rollback procedures for every deployment workflow.",
+    "Test all automation with mock providers before applying to real infrastructure."
+  ],
+  "tags": [
+    "infrastructure",
+    "devops",
+    "automation",
+    "ci-cd",
+    "deployment",
+    "iac",
+    "terraform",
+    "cloud"
+  ]
+}
