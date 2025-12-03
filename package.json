@@ -1,0 +1,17 @@
+{
+  "name": "blackroad-os-pack-infra-devops",
+  "version": "1.0.0",
+  "description": "Minimal Node.js service with health endpoint for infrastructure workflows",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "test": "node --test",
+    "lint": "node --check index.js src/server.js",
+    "build": "echo \"No build step\""
+  },
+  "keywords": ["infra", "healthcheck", "node"],
+  "author": "",
+  "license": "ISC"
+}
