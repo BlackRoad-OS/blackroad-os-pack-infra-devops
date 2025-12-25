@@ -1,0 +1,73 @@
+# Dependencies
+node_modules
+*.pyc
+__pycache__
+venv/
+env/
+.venv/
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.*
+*.secrets
+secrets/
+
+# Cache and temp files
+.cache
+.tmp
+tmp/
+*.log
+*.log.*
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Terraform
+*.tfvars
+!example.tfvars
+.terraform.d/
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Cloud provider configs (keep templates only)
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account.json
+
+# Testing
+coverage/
+.pytest_cache/
+.coverage
+htmlcov/
+test-results/
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Lock files (uncomment if you want to ignore)
+# package-lock.json
+# yarn.lock
+# Pipfile.lock

@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    name: Validate Repository Structure
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate JSON files
+      run: |
+        echo "Validating JSON files..."
+        find . -name "*.json" -type f -exec sh -c '
+          for file do
+            echo "Checking $file"
+            python3 -m json.tool "$file" > /dev/null || exit 1
+          done
+        ' sh {} +
+        echo "✅ All JSON files are valid"
+    
+    - name: Check required files
+      run: |
+        echo "Checking required files..."
+        required_files=(
+          "README.md"
+          "codex.prompt.json"
+          "LICENSE"
+          "CONTRIBUTING.md"
+          ".gitignore"
+        )
+        
+        for file in "${required_files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ Missing required file: $file"
+            exit 1
+          fi
+          echo "✅ Found: $file"
+        done
+        
+    - name: Validate directory structure
+      run: |
+        echo "Checking directory structure..."
+        required_dirs=(
+          "workflows"
+          "templates"
+          "templates/terraform"
+          "templates/ci-cd"
+          "schemas"
+          "agents"
+          "runbooks"
+          "checklists"
+        )
+        
+        for dir in "${required_dirs[@]}"; do
+          if [ ! -d "$dir" ]; then
+            echo "❌ Missing required directory: $dir"
+            exit 1
+          fi
+          echo "✅ Found: $dir"
+        done
+        
+    - name: Summary
+      run: |
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "✅ Repository structure validation passed!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
