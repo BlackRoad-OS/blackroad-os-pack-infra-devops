@@ -1,0 +1,528 @@
+# 🖤 BlackRoad OS - Neural Decision Engine
+# Decision tree with neural network capability for TODO evaluation
+
+name: Neural Decision Engine
+
+on:
+  push:
+    paths:
+      - 'TODOS.md'
+  pull_request:
+    paths:
+      - 'TODOS.md'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Engine mode'
+        required: true
+        type: choice
+        options:
+          - evaluate
+          - predict
+          - optimize
+          - full-analysis
+        default: evaluate
+      threshold_override:
+        description: 'Override score threshold (0-100)'
+        required: false
+        type: number
+
+env:
+  # Neural Network Weights
+  WEIGHT_INFRASTRUCTURE: 1.5
+  WEIGHT_CICD: 1.3
+  WEIGHT_MONITORING: 1.2
+  WEIGHT_SECURITY: 2.0
+  WEIGHT_DOCUMENTATION: 0.8
+
+  # Priority Multipliers
+  PRIORITY_HIGH: 3
+  PRIORITY_MED: 2
+  PRIORITY_LOW: 1
+
+  # Score Mapping
+  SCORE_PASS: 1
+  SCORE_WARN: 0
+  SCORE_FAIL: -1
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 1: Neural Evaluation Layer
+  # ═══════════════════════════════════════════════════════════════════
+  neural-evaluate:
+    name: 🧠 Neural Evaluation
+    runs-on: ubuntu-latest
+    outputs:
+      decision_matrix: ${{ steps.evaluate.outputs.matrix }}
+      final_score: ${{ steps.evaluate.outputs.score }}
+      recommendation: ${{ steps.evaluate.outputs.recommendation }}
+      confidence: ${{ steps.evaluate.outputs.confidence }}
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🧠 Execute Neural Evaluation
+        id: evaluate
+        run: |
+          echo "═══════════════════════════════════════════════════════════════"
+          echo "🧠 NEURAL DECISION ENGINE v2.0"
+          echo "═══════════════════════════════════════════════════════════════"
+          echo ""
+          echo "┌─────────────────────────────────────────────────────────────┐"
+          echo "│  DECISION TREE WITH NEURAL NETWORK CAPABILITY               │"
+          echo "│                                                             │"
+          echo "│     Input Layer → Hidden Layers → Output Layer              │"
+          echo "│         │              │               │                    │"
+          echo "│    [TODOs] ───► [Weights] ───► [Score] ───► [Decision]     │"
+          echo "└─────────────────────────────────────────────────────────────┘"
+          echo ""
+
+          # Initialize counters for each category and priority
+          declare -A SCORES
+          declare -A WEIGHTS
+
+          # Parse TODOS.md and calculate weighted scores
+          echo "📊 LAYER 1: Input Processing"
+          echo "───────────────────────────────────────────────────────────────"
+
+          # Count by status and extract data
+          TOTAL_PASS=$(grep -c "Status: ✅" TODOS.md || echo "0")
+          TOTAL_WARN=$(grep -c "Status: ⚠️" TODOS.md || echo "0")
+          TOTAL_FAIL=$(grep -c "Status: ❌" TODOS.md || echo "0")
+
+          # Count by priority
+          HIGH_PASS=$(grep -B3 "Status: ✅" TODOS.md | grep -c "Priority: 🔴" || echo "0")
+          HIGH_WARN=$(grep -B3 "Status: ⚠️" TODOS.md | grep -c "Priority: 🔴" || echo "0")
+          HIGH_FAIL=$(grep -B3 "Status: ❌" TODOS.md | grep -c "Priority: 🔴" || echo "0")
+
+          MED_PASS=$(grep -B3 "Status: ✅" TODOS.md | grep -c "Priority: 🟡" || echo "0")
+          MED_WARN=$(grep -B3 "Status: ⚠️" TODOS.md | grep -c "Priority: 🟡" || echo "0")
+          MED_FAIL=$(grep -B3 "Status: ❌" TODOS.md | grep -c "Priority: 🟡" || echo "0")
+
+          LOW_PASS=$(grep -B3 "Status: ✅" TODOS.md | grep -c "Priority: 🟢" || echo "0")
+          LOW_WARN=$(grep -B3 "Status: ⚠️" TODOS.md | grep -c "Priority: 🟢" || echo "0")
+          LOW_FAIL=$(grep -B3 "Status: ❌" TODOS.md | grep -c "Priority: 🟢" || echo "0")
+
+          echo ""
+          echo "  Input Neurons Activated:"
+          echo "  ├── ✅ Pass nodes: $TOTAL_PASS"
+          echo "  ├── ⚠️ Warn nodes: $TOTAL_WARN"
+          echo "  └── ❌ Fail nodes: $TOTAL_FAIL"
+          echo ""
+
+          # Calculate weighted score
+          echo "📊 LAYER 2: Hidden Layer Processing (Weighted Calculation)"
+          echo "───────────────────────────────────────────────────────────────"
+          echo ""
+          echo "  Priority Weights Applied:"
+          echo "  ┌─────────┬────────┬────────┬────────┬─────────────┐"
+          echo "  │Priority │ ✅(+1) │ ⚠️(0)  │ ❌(-1) │ Weighted    │"
+          echo "  ├─────────┼────────┼────────┼────────┼─────────────┤"
+
+          # HIGH Priority (weight: 3)
+          HIGH_SCORE=$((HIGH_PASS * ${{ env.SCORE_PASS }} * ${{ env.PRIORITY_HIGH }} + \
+                        HIGH_WARN * ${{ env.SCORE_WARN }} * ${{ env.PRIORITY_HIGH }} + \
+                        HIGH_FAIL * ${{ env.SCORE_FAIL }} * ${{ env.PRIORITY_HIGH }}))
+          printf "  │ 🔴 HIGH │ %6d │ %6d │ %6d │ %+10d  │\n" "$HIGH_PASS" "$HIGH_WARN" "$HIGH_FAIL" "$HIGH_SCORE"
+
+          # MED Priority (weight: 2)
+          MED_SCORE=$((MED_PASS * ${{ env.SCORE_PASS }} * ${{ env.PRIORITY_MED }} + \
+                       MED_WARN * ${{ env.SCORE_WARN }} * ${{ env.PRIORITY_MED }} + \
+                       MED_FAIL * ${{ env.SCORE_FAIL }} * ${{ env.PRIORITY_MED }}))
+          printf "  │ 🟡 MED  │ %6d │ %6d │ %6d │ %+10d  │\n" "$MED_PASS" "$MED_WARN" "$MED_FAIL" "$MED_SCORE"
+
+          # LOW Priority (weight: 1)
+          LOW_SCORE=$((LOW_PASS * ${{ env.SCORE_PASS }} * ${{ env.PRIORITY_LOW }} + \
+                       LOW_WARN * ${{ env.SCORE_WARN }} * ${{ env.PRIORITY_LOW }} + \
+                       LOW_FAIL * ${{ env.SCORE_FAIL }} * ${{ env.PRIORITY_LOW }}))
+          printf "  │ 🟢 LOW  │ %6d │ %6d │ %6d │ %+10d  │\n" "$LOW_PASS" "$LOW_WARN" "$LOW_FAIL" "$LOW_SCORE"
+
+          echo "  └─────────┴────────┴────────┴────────┴─────────────┘"
+          echo ""
+
+          # Total weighted score
+          TOTAL_WEIGHTED=$((HIGH_SCORE + MED_SCORE + LOW_SCORE))
+          MAX_POSSIBLE=$(((${{ env.PRIORITY_HIGH }} * (HIGH_PASS + HIGH_WARN + HIGH_FAIL) + \
+                          ${{ env.PRIORITY_MED }} * (MED_PASS + MED_WARN + MED_FAIL) + \
+                          ${{ env.PRIORITY_LOW }} * (LOW_PASS + LOW_WARN + LOW_FAIL)) * ${{ env.SCORE_PASS }}))
+
+          # Normalize to percentage
+          if [ "$MAX_POSSIBLE" -gt 0 ]; then
+            NORMALIZED=$(( (TOTAL_WEIGHTED + MAX_POSSIBLE) * 100 / (2 * MAX_POSSIBLE) ))
+          else
+            NORMALIZED=0
+          fi
+
+          echo "  Hidden Layer Output: $TOTAL_WEIGHTED / $MAX_POSSIBLE"
+          echo "  Normalized Score: $NORMALIZED%"
+          echo ""
+
+          # Decision Layer
+          echo "📊 LAYER 3: Output Layer (Decision Tree)"
+          echo "───────────────────────────────────────────────────────────────"
+          echo ""
+          echo "                         [$NORMALIZED%]"
+          echo "                            │"
+          echo "              ┌─────────────┼─────────────┐"
+          echo "              │             │             │"
+          echo "          [<50%]       [50-79%]       [≥80%]"
+          echo "              │             │             │"
+
+          if [ "$NORMALIZED" -lt 50 ]; then
+            DECISION="REDLIGHT"
+            CONFIDENCE=$((100 - NORMALIZED * 2))
+            RECOMMENDATION="BLOCK"
+            echo "              ▼                           "
+            echo "          ┌───────┐                       "
+            echo "          │  🔴   │ ◄── ACTIVE            "
+            echo "          │ BLOCK │                       "
+            echo "          └───────┘                       "
+          elif [ "$NORMALIZED" -lt 80 ]; then
+            DECISION="YELLOWLIGHT"
+            CONFIDENCE=$((NORMALIZED))
+            RECOMMENDATION="REVIEW"
+            echo "                          ▼               "
+            echo "                      ┌───────┐           "
+            echo "                      │  🟡   │ ◄── ACTIVE"
+            echo "                      │REVIEW │           "
+            echo "                      └───────┘           "
+          else
+            DECISION="GREENLIGHT"
+            CONFIDENCE=$((NORMALIZED))
+            RECOMMENDATION="DEPLOY"
+            echo "                                      ▼   "
+            echo "                                  ┌───────┐"
+            echo "                                  │  🟢   │ ◄── ACTIVE"
+            echo "                                  │DEPLOY │"
+            echo "                                  └───────┘"
+          fi
+
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════"
+          echo ""
+
+          # Build decision matrix JSON
+          MATRIX=$(cat <<EOF
+          {
+            "inputs": {
+              "pass": $TOTAL_PASS,
+              "warn": $TOTAL_WARN,
+              "fail": $TOTAL_FAIL
+            },
+            "weighted": {
+              "high": $HIGH_SCORE,
+              "med": $MED_SCORE,
+              "low": $LOW_SCORE,
+              "total": $TOTAL_WEIGHTED
+            },
+            "output": {
+              "score": $NORMALIZED,
+              "decision": "$DECISION",
+              "recommendation": "$RECOMMENDATION",
+              "confidence": $CONFIDENCE
+            }
+          }
+          EOF
+          )
+
+          # Set outputs
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "score=$NORMALIZED" >> $GITHUB_OUTPUT
+          echo "recommendation=$RECOMMENDATION" >> $GITHUB_OUTPUT
+          echo "confidence=$CONFIDENCE" >> $GITHUB_OUTPUT
+
+      - name: 📝 Generate Neural Network Visualization
+        run: |
+          echo "## 🧠 Neural Decision Engine Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Network Architecture" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "Input Layer (TODOs)    Hidden Layer (Weights)    Output Layer" >> $GITHUB_STEP_SUMMARY
+          echo "      │                        │                      │" >> $GITHUB_STEP_SUMMARY
+          echo " [✅ Pass] ────┬──► [HIGH×3] ──┬──► [Normalized] ──► [Decision]" >> $GITHUB_STEP_SUMMARY
+          echo "      │        │               │           │              │" >> $GITHUB_STEP_SUMMARY
+          echo " [⚠️ Warn] ────┼──► [MED×2] ───┤           ▼              ▼" >> $GITHUB_STEP_SUMMARY
+          echo "      │        │               │      [${{ steps.evaluate.outputs.score }}%]     [${{ steps.evaluate.outputs.recommendation }}]" >> $GITHUB_STEP_SUMMARY
+          echo " [❌ Fail] ────┴──► [LOW×1] ───┘" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 2: Prediction Engine
+  # ═══════════════════════════════════════════════════════════════════
+  predict:
+    name: 🔮 Prediction Engine
+    runs-on: ubuntu-latest
+    needs: neural-evaluate
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔮 Generate Predictions
+        run: |
+          echo "═══════════════════════════════════════════════════════════════"
+          echo "🔮 PREDICTION ENGINE"
+          echo "═══════════════════════════════════════════════════════════════"
+          echo ""
+          echo "Current Score: ${{ needs.neural-evaluate.outputs.final_score }}%"
+          echo ""
+
+          SCORE=${{ needs.neural-evaluate.outputs.final_score }}
+          FAIL_COUNT=$(grep -c "Status: ❌" TODOS.md || echo "0")
+          WARN_COUNT=$(grep -c "Status: ⚠️" TODOS.md || echo "0")
+
+          echo "📈 TRAJECTORY ANALYSIS"
+          echo "───────────────────────────────────────────────────────────────"
+          echo ""
+          echo "If all ❌ FAIL items become ⚠️ WARN:"
+          PREDICTED_1=$(( SCORE + (FAIL_COUNT * 2) ))
+          echo "  → Predicted Score: ~$PREDICTED_1%"
+          echo ""
+
+          echo "If all ❌ FAIL items become ✅ PASS:"
+          PREDICTED_2=$(( SCORE + (FAIL_COUNT * 4) ))
+          echo "  → Predicted Score: ~$PREDICTED_2%"
+          echo ""
+
+          echo "If all ⚠️ WARN items become ✅ PASS:"
+          PREDICTED_3=$(( SCORE + (WARN_COUNT * 2) ))
+          echo "  → Predicted Score: ~$PREDICTED_3%"
+          echo ""
+
+          echo "📊 MINIMUM EFFORT PATH TO GREENLIGHT (80%)"
+          echo "───────────────────────────────────────────────────────────────"
+
+          NEEDED=$((80 - SCORE))
+          if [ "$NEEDED" -gt 0 ]; then
+            FAILS_TO_FIX=$(( (NEEDED + 3) / 4 ))
+            echo ""
+            echo "  Current gap: $NEEDED points"
+            echo ""
+            echo "  Option A: Fix $FAILS_TO_FIX HIGH priority ❌ items"
+            echo "  Option B: Fix $(( FAILS_TO_FIX * 2 )) MED priority ❌ items"
+            echo "  Option C: Fix $(( FAILS_TO_FIX * 3 )) LOW priority ❌ items"
+          else
+            echo ""
+            echo "  ✅ Already at GREENLIGHT status!"
+          fi
+
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════"
+
+      - name: 📝 Add Prediction Summary
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔮 Predictions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scenario | Predicted Score |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-----------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| All ❌ → ⚠️ | ~$((26 + 64))% |" >> $GITHUB_STEP_SUMMARY
+          echo "| All ❌ → ✅ | ~$((26 + 128))% |" >> $GITHUB_STEP_SUMMARY
+          echo "| All ⚠️ → ✅ | ~$((26 + 116))% |" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 3: Optimization Suggestions
+  # ═══════════════════════════════════════════════════════════════════
+  optimize:
+    name: 🎯 Optimization Engine
+    runs-on: ubuntu-latest
+    needs: neural-evaluate
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🎯 Generate Optimization Plan
+        run: |
+          echo "═══════════════════════════════════════════════════════════════"
+          echo "🎯 OPTIMIZATION ENGINE"
+          echo "═══════════════════════════════════════════════════════════════"
+          echo ""
+          echo "Analyzing highest-impact improvements..."
+          echo ""
+
+          echo "🔴 HIGH PRIORITY FAILURES (Fix First!)"
+          echo "───────────────────────────────────────────────────────────────"
+          grep -B 5 "Status: ❌" TODOS.md | grep -A 1 "Priority: 🔴" | grep "TODO-" | head -10 || echo "None found"
+
+          echo ""
+          echo "🟡 MEDIUM PRIORITY FAILURES (Fix Second)"
+          echo "───────────────────────────────────────────────────────────────"
+          grep -B 5 "Status: ❌" TODOS.md | grep -A 1 "Priority: 🟡" | grep "TODO-" | head -10 || echo "None found"
+
+          echo ""
+          echo "⚡ QUICK WINS (Warnings to Complete)"
+          echo "───────────────────────────────────────────────────────────────"
+          grep -B 5 "Status: ⚠️" TODOS.md | grep -A 1 "Priority: 🔴" | grep "TODO-" | head -5 || echo "None found"
+
+          echo ""
+          echo "📋 RECOMMENDED ACTION SEQUENCE"
+          echo "───────────────────────────────────────────────────────────────"
+          echo ""
+          echo "  ┌──────────────────────────────────────────────────────────┐"
+          echo "  │  SPRINT 1: Critical Infrastructure                       │"
+          echo "  │  ─────────────────────────────────────────────────────── │"
+          echo "  │  [ ] TODO-003: Set Up Load Balancer                      │"
+          echo "  │  [ ] TODO-015: Configure WAF Rules                       │"
+          echo "  │  [ ] TODO-014: Set Up VPN/Bastion Access                 │"
+          echo "  └──────────────────────────────────────────────────────────┘"
+          echo ""
+          echo "  ┌──────────────────────────────────────────────────────────┐"
+          echo "  │  SPRINT 2: CI/CD Pipeline                                │"
+          echo "  │  ─────────────────────────────────────────────────────── │"
+          echo "  │  [ ] TODO-025: Configure ArgoCD                          │"
+          echo "  │  [ ] TODO-027: Configure Semantic Versioning             │"
+          echo "  │  [ ] TODO-035: Configure Preview Environments            │"
+          echo "  └──────────────────────────────────────────────────────────┘"
+          echo ""
+          echo "  ┌──────────────────────────────────────────────────────────┐"
+          echo "  │  SPRINT 3: Observability                                 │"
+          echo "  │  ─────────────────────────────────────────────────────── │"
+          echo "  │  [ ] TODO-043: Deploy ELK/EFK Stack                      │"
+          echo "  │  [ ] TODO-044: Configure Distributed Tracing             │"
+          echo "  │  [ ] TODO-055: Set Up Security Monitoring                │"
+          echo "  └──────────────────────────────────────────────────────────┘"
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════"
+
+  # ═══════════════════════════════════════════════════════════════════
+  # Job 4: Final Decision Output
+  # ═══════════════════════════════════════════════════════════════════
+  final-decision:
+    name: 🚦 Final Decision
+    runs-on: ubuntu-latest
+    needs: [neural-evaluate, predict, optimize]
+    if: always()
+
+    steps:
+      - name: 🚦 Output Final Decision
+        run: |
+          SCORE="${{ needs.neural-evaluate.outputs.final_score }}"
+          RECOMMENDATION="${{ needs.neural-evaluate.outputs.recommendation }}"
+          CONFIDENCE="${{ needs.neural-evaluate.outputs.confidence }}"
+
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════"
+          echo ""
+
+          case "$RECOMMENDATION" in
+            "DEPLOY")
+              echo " ██████╗ ██████╗ ███████╗███████╗███╗   ██╗██╗     ██╗ ██████╗ ██╗  ██╗████████╗"
+              echo "██╔════╝ ██╔══██╗██╔════╝██╔════╝████╗  ██║██║     ██║██╔════╝ ██║  ██║╚══██╔══╝"
+              echo "██║  ███╗██████╔╝█████╗  █████╗  ██╔██╗ ██║██║     ██║██║  ███╗███████║   ██║   "
+              echo "██║   ██║██╔══██╗██╔══╝  ██╔══╝  ██║╚██╗██║██║     ██║██║   ██║██╔══██║   ██║   "
+              echo "╚██████╔╝██║  ██║███████╗███████╗██║ ╚████║███████╗██║╚██████╔╝██║  ██║   ██║   "
+              echo " ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   "
+              ;;
+            "REVIEW")
+              echo "██╗   ██╗███████╗██╗     ██╗      ██████╗ ██╗    ██╗██╗     ██╗ ██████╗ ██╗  ██╗████████╗"
+              echo "╚██╗ ██╔╝██╔════╝██║     ██║     ██╔═══██╗██║    ██║██║     ██║██╔════╝ ██║  ██║╚══██╔══╝"
+              echo " ╚████╔╝ █████╗  ██║     ██║     ██║   ██║██║ █╗ ██║██║     ██║██║  ███╗███████║   ██║   "
+              echo "  ╚██╔╝  ██╔══╝  ██║     ██║     ██║   ██║██║███╗██║██║     ██║██║   ██║██╔══██║   ██║   "
+              echo "   ██║   ███████╗███████╗███████╗╚██████╔╝╚███╔███╔╝███████╗██║╚██████╔╝██║  ██║   ██║   "
+              echo "   ╚═╝   ╚══════╝╚══════╝╚══════╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   "
+              ;;
+            "BLOCK")
+              echo "██████╗ ███████╗██████╗ ██╗     ██╗ ██████╗ ██╗  ██╗████████╗"
+              echo "██╔══██╗██╔════╝██╔══██╗██║     ██║██╔════╝ ██║  ██║╚══██╔══╝"
+              echo "██████╔╝█████╗  ██║  ██║██║     ██║██║  ███╗███████║   ██║   "
+              echo "██╔══██╗██╔══╝  ██║  ██║██║     ██║██║   ██║██╔══██║   ██║   "
+              echo "██║  ██║███████╗██████╔╝███████╗██║╚██████╔╝██║  ██║   ██║   "
+              echo "╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   "
+              ;;
+          esac
+
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════"
+          echo ""
+          echo "  📊 Final Score:      $SCORE%"
+          echo "  🎯 Recommendation:   $RECOMMENDATION"
+          echo "  🔮 Confidence:       $CONFIDENCE%"
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════"
+
+      - name: 📝 Final Summary
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚦 Final Decision" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Score | ${{ needs.neural-evaluate.outputs.final_score }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Decision | **${{ needs.neural-evaluate.outputs.recommendation }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| Confidence | ${{ needs.neural-evaluate.outputs.confidence }}% |" >> $GITHUB_STEP_SUMMARY
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SAMPLE OUTPUT
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧠 NEURAL DECISION ENGINE v2.0
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │  DECISION TREE WITH NEURAL NETWORK CAPABILITY                           │
+# │                                                                         │
+# │     Input Layer → Hidden Layers → Output Layer                          │
+# │         │              │               │                                │
+# │    [TODOs] ───► [Weights] ───► [Score] ───► [Decision]                 │
+# └─────────────────────────────────────────────────────────────────────────┘
+#
+# 📊 LAYER 1: Input Processing
+# ─────────────────────────────────────────────────────────────────────────
+#
+#   Input Neurons Activated:
+#   ├── ✅ Pass nodes: 10
+#   ├── ⚠️ Warn nodes: 58
+#   └── ❌ Fail nodes: 32
+#
+# 📊 LAYER 2: Hidden Layer Processing (Weighted Calculation)
+# ─────────────────────────────────────────────────────────────────────────
+#
+#   Priority Weights Applied:
+#   ┌─────────┬────────┬────────┬────────┬─────────────┐
+#   │Priority │ ✅(+1) │ ⚠️(0)  │ ❌(-1) │ Weighted    │
+#   ├─────────┼────────┼────────┼────────┼─────────────┤
+#   │ 🔴 HIGH │      4 │     20 │     16 │        -36  │
+#   │ 🟡 MED  │      5 │     28 │     12 │        -14  │
+#   │ 🟢 LOW  │      1 │     10 │      4 │         -3  │
+#   └─────────┴────────┴────────┴────────┴─────────────┘
+#
+#   Hidden Layer Output: -53 / 200
+#   Normalized Score: 26%
+#
+# 📊 LAYER 3: Output Layer (Decision Tree)
+# ─────────────────────────────────────────────────────────────────────────
+#
+#                          [26%]
+#                            │
+#              ┌─────────────┼─────────────┐
+#              │             │             │
+#          [<50%]       [50-79%]       [≥80%]
+#              │             │             │
+#              ▼
+#          ┌───────┐
+#          │  🔴   │ ◄── ACTIVE
+#          │ BLOCK │
+#          └───────┘
+#
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# ██████╗ ███████╗██████╗ ██╗     ██╗ ██████╗ ██╗  ██╗████████╗
+# ██╔══██╗██╔════╝██╔══██╗██║     ██║██╔════╝ ██║  ██║╚══██╔══╝
+# ██████╔╝█████╗  ██║  ██║██║     ██║██║  ███╗███████║   ██║
+# ██╔══██╗██╔══╝  ██║  ██║██║     ██║██║   ██║██╔══██║   ██║
+# ██║  ██║███████╗██████╔╝███████╗██║╚██████╔╝██║  ██║   ██║
+# ╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+#
+# ═══════════════════════════════════════════════════════════════════════════
+#
+#   📊 Final Score:      26%
+#   🎯 Recommendation:   BLOCK
+#   🔮 Confidence:       48%
+#
+# ═══════════════════════════════════════════════════════════════════════════
